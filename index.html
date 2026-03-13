@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VaultEdge — AI-Powered Crypto Trading</title>
+
+  <!-- ═══════════════════════════════════════════
+       META PIXEL — Replace YOUR_PIXEL_ID below
+  ════════════════════════════════════════════ -->
+  <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', 'YOUR_PIXEL_ID');
+    fbq('track', 'PageView');
+  </script>
+  <noscript>
+    <img height="1" width="1" style="display:none"
+      src="https://www.facebook.com/tr?id=YOUR_PIXEL_ID&ev=PageView&noscript=1"/>
+  </noscript>
+  <!-- ═══════════════════════════════════════════ -->
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black:   #08090c;
+      --deep:    #0d1117;
+      --card:    #111620;
+      --border:  #1e2535;
+      --blue:    #1a6cff;
+      --blue-lt: #3d8bff;
+      --cyan:    #00d4ff;
+      --white:   #f0f4ff;
+      --muted:   #7a8aaa;
+      --success: #00e5a0;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      overflow-x: hidden;
+      cursor: default;
+    }
+
+    /* ── NOISE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 9999; opacity: 0.35;
+    }
+
+    /* ── BACKGROUND GLOW ── */
+    .bg-glow {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 20% 10%, rgba(26,108,255,0.12) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 60% at 80% 80%, rgba(0,212,255,0.07) 0%, transparent 70%);
+    }
+
+    /* ── GRID LINES ── */
+    .grid-lines {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background-image:
+        linear-gradient(rgba(30,37,53,0.5) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(30,37,53,0.5) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    /* ── NAVBAR ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 48px;
+      background: rgba(8,9,12,0.7);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(30,37,53,0.6);
+    }
+
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.4rem;
+      letter-spacing: -0.02em;
+      color: var(--white);
+      display: flex; align-items: center; gap: 10px;
+    }
+
+    .logo-icon {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.9rem;
+    }
+
+    .nav-badge {
+      font-size: 0.72rem; font-weight: 400;
+      color: var(--cyan);
+      background: rgba(0,212,255,0.1);
+      border: 1px solid rgba(0,212,255,0.25);
+      padding: 4px 10px; border-radius: 20px;
+      letter-spacing: 0.04em;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--cyan);
+      background: rgba(0,212,255,0.07);
+      border: 1px solid rgba(0,212,255,0.2);
+      padding: 8px 18px; border-radius: 30px;
+      margin-bottom: 32px;
+      animation: fadeUp 0.8s ease both;
+    }
+
+    .pulse-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--cyan);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.4; transform: scale(0.7); }
+    }
+
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.6rem, 7vw, 5.2rem);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      max-width: 820px;
+      animation: fadeUp 0.9s 0.1s ease both;
+    }
+
+    h1 span.grad {
+      background: linear-gradient(100deg, var(--blue-lt), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      margin-top: 24px;
+      font-size: clamp(1rem, 2vw, 1.15rem);
+      color: var(--muted);
+      max-width: 520px;
+      line-height: 1.7;
+      animation: fadeUp 1s 0.2s ease both;
+    }
+
+    /* ── CTA BUTTON ── */
+    .cta-wrap {
+      margin-top: 44px;
+      display: flex; flex-direction: column; align-items: center; gap: 14px;
+      animation: fadeUp 1s 0.3s ease both;
+    }
+
+    .cta-btn {
+      display: inline-flex; align-items: center; gap: 12px;
+      background: linear-gradient(135deg, var(--blue), #0050dd);
+      color: #fff;
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem; font-weight: 700;
+      letter-spacing: 0.01em;
+      text-decoration: none;
+      padding: 18px 40px; border-radius: 12px;
+      border: 1px solid rgba(61,139,255,0.4);
+      box-shadow: 0 0 40px rgba(26,108,255,0.35), 0 4px 20px rgba(0,0,0,0.4);
+      transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+      cursor: pointer;
+    }
+
+    .cta-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 0 60px rgba(26,108,255,0.55), 0 8px 30px rgba(0,0,0,0.5);
+      background: linear-gradient(135deg, var(--blue-lt), var(--blue));
+    }
+
+    .cta-btn:active { transform: translateY(0); }
+
+    .tg-icon {
+      width: 22px; height: 22px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem;
+    }
+
+    .cta-note {
+      font-size: 0.78rem; color: var(--muted);
+      display: flex; align-items: center; gap: 6px;
+    }
+
+    .cta-note::before {
+      content: '🔒'; font-size: 0.7rem;
+    }
+
+    /* ── STATS ROW ── */
+    .stats {
+      position: relative; z-index: 1;
+      display: flex; justify-content: center; gap: 2px;
+      flex-wrap: wrap;
+      padding: 0 24px 80px;
+      animation: fadeUp 1s 0.4s ease both;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px 40px;
+      text-align: center;
+      flex: 1; min-width: 160px; max-width: 220px;
+      position: relative; overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+      width: 60%; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--blue), transparent);
+    }
+
+    .stat-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 2rem; font-weight: 800;
+      color: var(--white);
+      display: block;
+    }
+
+    .stat-label {
+      font-size: 0.78rem; color: var(--muted);
+      margin-top: 4px; letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    /* ── HOW IT WORKS ── */
+    .section {
+      position: relative; z-index: 1;
+      padding: 80px 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section-tag {
+      font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--blue-lt); margin-bottom: 14px;
+    }
+
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800; letter-spacing: -0.02em;
+      line-height: 1.15;
+      margin-bottom: 50px;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .step-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px 28px;
+      position: relative;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+
+    .step-card:hover {
+      border-color: rgba(26,108,255,0.5);
+      transform: translateY(-4px);
+    }
+
+    .step-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.7rem; font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--blue-lt);
+      background: rgba(26,108,255,0.12);
+      border: 1px solid rgba(26,108,255,0.25);
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .step-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.05rem; font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .step-desc {
+      font-size: 0.88rem; color: var(--muted);
+      line-height: 1.65;
+    }
+
+    /* ── FEATURES ── */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .feat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 30px;
+      display: flex; gap: 18px; align-items: flex-start;
+      transition: border-color 0.3s;
+    }
+
+    .feat-card:hover { border-color: rgba(0,212,255,0.3); }
+
+    .feat-icon {
+      width: 44px; height: 44px; flex-shrink: 0;
+      background: linear-gradient(135deg, rgba(26,108,255,0.2), rgba(0,212,255,0.1));
+      border: 1px solid rgba(26,108,255,0.25);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+    }
+
+    .feat-text h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.95rem; font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .feat-text p {
+      font-size: 0.84rem; color: var(--muted); line-height: 1.6;
+    }
+
+    /* ── LIVE TICKER ── */
+    .ticker-wrap {
+      position: relative; z-index: 1;
+      overflow: hidden;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: rgba(13,17,23,0.7);
+      padding: 14px 0;
+      margin: 20px 0;
+    }
+
+    .ticker-track {
+      display: flex; gap: 56px;
+      animation: ticker 22s linear infinite;
+      white-space: nowrap;
+    }
+
+    .ticker-item {
+      display: flex; align-items: center; gap: 8px;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.82rem; font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .tick-symbol { color: var(--white); }
+    .tick-up   { color: var(--success); }
+    .tick-down { color: #ff5e6d; }
+
+    @keyframes ticker {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* ── BOTTOM CTA SECTION ── */
+    .bottom-cta {
+      position: relative; z-index: 1;
+      text-align: center;
+      padding: 100px 24px;
+    }
+
+    .bottom-cta-box {
+      display: inline-block;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 64px 56px;
+      max-width: 640px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .bottom-cta-box::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--blue), var(--cyan), transparent);
+    }
+
+    .bottom-cta h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 800; letter-spacing: -0.02em;
+      margin-bottom: 16px;
+    }
+
+    .bottom-cta p {
+      color: var(--muted); font-size: 0.95rem;
+      line-height: 1.7; margin-bottom: 36px;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative; z-index: 1;
+      border-top: 1px solid var(--border);
+      padding: 28px 48px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px;
+    }
+
+    .footer-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800; font-size: 1rem;
+      color: var(--muted);
+    }
+
+    .footer-note {
+      font-size: 0.73rem; color: rgba(122,138,170,0.5);
+      max-width: 500px; text-align: right; line-height: 1.5;
+    }
+
+    /* ── DISCLAIMER ── */
+    .disclaimer {
+      position: relative; z-index: 1;
+      background: rgba(13,17,23,0.6);
+      border-top: 1px solid var(--border);
+      padding: 20px 48px;
+      font-size: 0.71rem; color: rgba(122,138,170,0.5);
+      text-align: center; line-height: 1.6;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── REDIRECT OVERLAY ── */
+    #redirect-overlay {
+      position: fixed; inset: 0; z-index: 10000;
+      background: rgba(8,9,12,0.96);
+      backdrop-filter: blur(16px);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+
+    #redirect-overlay.active {
+      opacity: 1; pointer-events: all;
+    }
+
+    .redirect-box {
+      text-align: center;
+      display: flex; flex-direction: column; align-items: center; gap: 24px;
+    }
+
+    .redirect-icon {
+      width: 72px; height: 72px;
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+      border-radius: 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem;
+      box-shadow: 0 0 50px rgba(26,108,255,0.5);
+      animation: iconPop 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+
+    @keyframes iconPop {
+      from { transform: scale(0.5); opacity: 0; }
+      to   { transform: scale(1);   opacity: 1; }
+    }
+
+    .redirect-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.5rem; font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .redirect-sub {
+      font-size: 0.9rem; color: var(--muted);
+    }
+
+    /* Circular countdown ring */
+    .countdown-ring {
+      position: relative;
+      width: 80px; height: 80px;
+    }
+
+    .countdown-ring svg {
+      transform: rotate(-90deg);
+    }
+
+    .ring-bg {
+      fill: none;
+      stroke: var(--border);
+      stroke-width: 4;
+    }
+
+    .ring-progress {
+      fill: none;
+      stroke: url(#ringGrad);
+      stroke-width: 4;
+      stroke-linecap: round;
+      stroke-dasharray: 220;
+      stroke-dashoffset: 0;
+      transition: stroke-dashoffset 1s linear;
+    }
+
+    .countdown-num {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Syne', sans-serif;
+      font-size: 1.6rem; font-weight: 800;
+      color: var(--white);
+    }
+
+    .redirect-skip {
+      font-size: 0.78rem; color: var(--muted);
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      background: none; border: none; color: var(--muted);
+      transition: color 0.2s;
+    }
+
+    .redirect-skip:hover { color: var(--white); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      nav { padding: 16px 20px; }
+      .bottom-cta-box { padding: 40px 24px; }
+      footer { padding: 24px 20px; flex-direction: column; }
+      .footer-note { text-align: left; }
+      .stat-card { min-width: 140px; padding: 20px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── REDIRECT OVERLAY ── -->
+<div id="redirect-overlay">
+  <div class="redirect-box">
+    <div class="redirect-icon">✈</div>
+    <div>
+      <div class="redirect-title">Taking you to VaultEdge</div>
+      <div class="redirect-sub">Opening Telegram bot in a moment…</div>
+    </div>
+    <div class="countdown-ring">
+      <svg width="80" height="80" viewBox="0 0 80 80">
+        <defs>
+          <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#1a6cff"/>
+            <stop offset="100%" stop-color="#00d4ff"/>
+          </linearGradient>
+        </defs>
+        <circle class="ring-bg" cx="40" cy="40" r="35"/>
+        <circle class="ring-progress" id="ring-progress" cx="40" cy="40" r="35"/>
+      </svg>
+      <div class="countdown-num" id="countdown-num">5</div>
+    </div>
+  </div>
+</div>
+
+<div class="bg-glow"></div>
+<div class="grid-lines"></div>
+
+<!-- ── NAVBAR ── -->
+<nav>
+  <div class="logo">
+    <div class="logo-icon">⬡</div>
+    VaultEdge
+  </div>
+  <div class="nav-badge">AI Trading · Live</div>
+</nav>
+
+<!-- ── TICKER ── -->
+<div style="height:72px"></div>
+<div class="ticker-wrap">
+  <div class="ticker-track">
+    <!-- set 1 -->
+    <span class="ticker-item"><span class="tick-symbol">BTC/USDT</span><span class="tick-up">▲ +3.24%</span></span>
+    <span class="ticker-item"><span class="tick-symbol">ETH/USDT</span><span class="tick-up">▲ +1.87%</span></span>
+    <span class="ticker-item"><span class="tick-symbol">SOL/USDT</span><span class="tick-up">▲ +5.11%</span></span>
+    <span class="ticker-item"><span class="tick-symbol">BNB/USDT</span><span class="tick-down">▼ −0.63%</span></span>
+    <span class="ticker-item"><span class="tick-symbol">MATIC/USDT</span><span class="tick-up">▲ +2.45%</span></span>
+    <span class="ticker-item"><span class="tick-symbol">ADA/USDT</span><span class="tick-down">▼ −1.02%</span></span>
+    <span class="ticker-item"><span class="tick-symbol">AVAX/USDT</span><span class="tick-up">▲ +4.08%</span></span>
+    <span class="ticker-item"><span class="tick-symbol">DOGE/USDT</span><span class="tick-up">▲ +0.91%</span></span>
+    <!-- set 2 (duplicate for seamless loop) -->
+    <span class="ticker-item"><span class="tick-symbol">BTC/USDT</span><span class="tick-up">▲ +3.24%</span></span>
+    <span class="ticker-item"><span class="tick-symbol">ETH/USDT</span><span class="tick-up">▲ +1.87%</span></span>
+    <span class="ticker-item"><span class="tick-symbol">SOL/USDT</span><span class="tick-up">▲ +5.11%</span></span>
+    <span class="ticker-item"><span class="tick-symbol">BNB/USDT</span><span class="tick-down">▼ −0.63%</span></span>
+    <span class="ticker-item"><span class="tick-symbol">MATIC/USDT</span><span class="tick-up">▲ +2.45%</span></span>
+    <span class="ticker-item"><span class="tick-symbol">ADA/USDT</span><span class="tick-down">▼ −1.02%</span></span>
+    <span class="ticker-item"><span class="tick-symbol">AVAX/USDT</span><span class="tick-up">▲ +4.08%</span></span>
+    <span class="ticker-item"><span class="tick-symbol">DOGE/USDT</span><span class="tick-up">▲ +0.91%</span></span>
+  </div>
+</div>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="hero-eyebrow">
+    <span class="pulse-dot"></span>
+    AI Trading Engine · Active
+  </div>
+
+  <h1>
+    Your Crypto.<br>
+    <span class="grad">Trading Itself.</span>
+  </h1>
+
+  <p class="hero-sub">
+    VaultEdge deploys advanced AI algorithms to execute crypto trades around the clock — so you earn while you sleep. No charts. No stress. Just results.
+  </p>
+
+  <div class="cta-wrap">
+    <a
+      href="https://t.me/VAULTEDGE1_bOT"
+      class="cta-btn"
+      id="tg-cta-hero"
+      onclick="trackTelegramClick()"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <span class="tg-icon">✈</span>
+      Start Trading on Telegram
+    </a>
+    <span class="cta-note">No credit card · Instant setup · Withdraw anytime</span>
+  </div>
+</section>
+
+<!-- ── STATS ── -->
+<div class="stats">
+  <div class="stat-card">
+    <span class="stat-num">24/7</span>
+    <span class="stat-label">AI Trading</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-num">50+</span>
+    <span class="stat-label">Crypto Pairs</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-num">3 Min</span>
+    <span class="stat-label">Setup Time</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-num">100%</span>
+    <span class="stat-label">Automated</span>
+  </div>
+</div>
+
+<!-- ── HOW IT WORKS ── -->
+<section class="section">
+  <p class="section-tag">How It Works</p>
+  <h2 class="section-title">Four steps to automated trading</h2>
+
+  <div class="steps">
+    <div class="step-card">
+      <div class="step-num">01</div>
+      <h3 class="step-title">Choose a Plan</h3>
+      <p class="step-desc">Select the investment plan that fits your goals — from starter to advanced trading tiers.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">02</div>
+      <h3 class="step-title">Deposit Funds</h3>
+      <p class="step-desc">Fund your account securely via crypto. Funds are allocated to your trading vault instantly.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">03</div>
+      <h3 class="step-title">AI Trades For You</h3>
+      <p class="step-desc">Our AI engine monitors markets and executes trades automatically — 24 hours a day, 7 days a week.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">04</div>
+      <h3 class="step-title">Withdraw Profits</h3>
+      <p class="step-desc">At the end of your cycle, withdraw your capital and any trading returns directly to your wallet.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── FEATURES ── -->
+<section class="section" style="padding-top: 20px;">
+  <p class="section-tag">Why VaultEdge</p>
+  <h2 class="section-title">Built for serious crypto investors</h2>
+
+  <div class="features">
+    <div class="feat-card">
+      <div class="feat-icon">🤖</div>
+      <div class="feat-text">
+        <h3>AI-Powered Engine</h3>
+        <p>Machine learning algorithms analyze market signals and execute high-precision trades faster than any human.</p>
+      </div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🔐</div>
+      <div class="feat-text">
+        <h3>Vault-Grade Security</h3>
+        <p>Your funds are protected by multi-layer security protocols and encrypted wallet infrastructure.</p>
+      </div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">⚡</div>
+      <div class="feat-text">
+        <h3>Telegram-Native</h3>
+        <p>Manage your entire portfolio from Telegram. Check balance, choose plans, and withdraw — all in one bot.</p>
+      </div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">📊</div>
+      <div class="feat-text">
+        <h3>Real-Time Transparency</h3>
+        <p>Live updates on your trades, account status, and cycle progress — always visible inside the bot.</p>
+      </div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🌍</div>
+      <div class="feat-text">
+        <h3>Global Access</h3>
+        <p>Available worldwide. Trade from Nigeria, UAE, UK, Canada, or anywhere with internet access.</p>
+      </div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🔄</div>
+      <div class="feat-text">
+        <h3>Multiple Strategies</h3>
+        <p>VaultEdge runs diversified AI strategies across multiple crypto pairs to optimize for market conditions.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── BOTTOM CTA ── -->
+<div class="bottom-cta">
+  <div class="bottom-cta-box">
+    <h2>Ready to put your crypto to work?</h2>
+    <p>Join thousands of users already using VaultEdge to access automated crypto trading strategies — directly from Telegram.</p>
+    <a
+      href="https://t.me/VAULTEDGE1_bOT"
+      class="cta-btn"
+      id="tg-cta-bottom"
+      onclick="trackTelegramClick()"
+      target="_blank"
+      rel="noopener noreferrer"
+      style="display: inline-flex;"
+    >
+      <span class="tg-icon">✈</span>
+      Open VaultEdge Bot
+    </a>
+  </div>
+</div>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-logo">VaultEdge</div>
+  <div class="footer-note">
+    VaultEdge is an automated crypto trading platform. Crypto trading involves significant risk. Past performance of trading algorithms does not guarantee future results.
+  </div>
+</footer>
+
+<div class="disclaimer">
+  This platform does not provide financial advice. Crypto assets are volatile and unregulated in some jurisdictions. Only invest what you can afford to lose. VaultEdge does not guarantee returns or profits.
+</div>
+
+<!-- ═══════════════════════════════════════════
+     CONVERSION TRACKING
+     Fires fbq Lead event on Telegram button click
+════════════════════════════════════════════ -->
+<script>
+  const TG_URL = 'https://t.me/VAULTEDGE1_bOT';
+  const COUNTDOWN_SECS = 5;
+  const CIRCUMFERENCE = 2 * Math.PI * 35; // r=35
+
+  let redirectTimer = null;
+  let countdownInterval = null;
+
+  function doRedirect() {
+    clearTimeout(redirectTimer);
+    clearInterval(countdownInterval);
+    // Fire pixel Lead event
+    if (typeof fbq === 'function') {
+      fbq('track', 'Lead', {
+        content_name: 'Telegram Bot CTA',
+        content_category: 'VaultEdge',
+        currency: 'USD',
+        value: 0
+      });
+      fbq('trackCustom', 'TelegramClick');
+    }
+    window.location.href = TG_URL;
+  }
+
+  function startRedirectOverlay() {
+    const overlay  = document.getElementById('redirect-overlay');
+    const numEl    = document.getElementById('countdown-num');
+    const ring     = document.getElementById('ring-progress');
+
+    // Setup ring
+    ring.style.strokeDasharray  = CIRCUMFERENCE;
+    ring.style.strokeDashoffset = 0;
+
+    overlay.classList.add('active');
+
+    let remaining = COUNTDOWN_SECS;
+    numEl.textContent = remaining;
+
+    // Animate ring shrink over total duration
+    // Use rAF trick: set offset to full after tiny delay so transition fires
+    setTimeout(() => {
+      ring.style.strokeDashoffset = CIRCUMFERENCE;
+      ring.style.transition = `stroke-dashoffset ${COUNTDOWN_SECS}s linear`;
+    }, 30);
+
+    countdownInterval = setInterval(() => {
+      remaining -= 1;
+      numEl.textContent = remaining;
+      if (remaining <= 0) {
+        clearInterval(countdownInterval);
+      }
+    }, 1000);
+
+    redirectTimer = setTimeout(doRedirect, COUNTDOWN_SECS * 1000);
+  }
+
+  function trackTelegramClick(e) {
+    if (e) e.preventDefault();
+    startRedirectOverlay();
+  }
+
+  // Scroll depth tracking
+  let contentTracked = false;
+  window.addEventListener('scroll', function() {
+    if (!contentTracked && window.scrollY > 300) {
+      contentTracked = true;
+      if (typeof fbq === 'function') {
+        fbq('track', 'ViewContent', {
+          content_name: 'VaultEdge Landing Page',
+          content_category: 'Crypto Trading'
+        });
+      }
+    }
+  });
+
+  // Auto-redirect on page load
+  window.addEventListener('load', function() {
+    startRedirectOverlay();
+  });
+</script>
+
+</body>
+</html>
