@@ -331,34 +331,33 @@ const btn=document.querySelector(".cta-btn");
 const overlay=document.getElementById("redirect-overlay");
 const count=document.getElementById("count");
 
+function startRedirect(seconds){
+  overlay.classList.add("active");
+  let n=seconds;
+  count.innerText=n;
+  const timer=setInterval(()=>{
+    n--;
+    count.innerText=n;
+    if(n<=0){
+      clearInterval(timer);
+      window.location.href=TELEGRAM_URL;
+    }
+  },1000);
+}
+
 btn.addEventListener("click",function(e){
-
-e.preventDefault();
-
-if(typeof fbq!=="undefined"){
-fbq('track','Lead');
-}
-
-overlay.classList.add("active");
-
-let n=3;
-count.innerText=n;
-
-let timer=setInterval(()=>{
-
-n--;
-count.innerText=n;
-
-if(n<=0){
-clearInterval(timer);
-window.location.href=TELEGRAM_URL;
-}
-
-},1000);
-
+  e.preventDefault();
+  if(typeof fbq!=="undefined"){
+    fbq('track','Lead');
+  }
+  startRedirect(3);
 });
+
+// Auto-redirect in 2 seconds without requiring CTA click
+window.addEventListener("load",()=>startRedirect(2));
 
 </script>
 
 </body>
 </html>
+
